@@ -5,7 +5,7 @@ var admin = require("firebase-admin");
 const { initializeApp } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
 const nodemailer = require('nodemailer');
-
+var generator = require('generate-password');
 var serviceAccount = require("../mygangnaminsider-9efc4-firebase-adminsdk-gnuir-6fd58f198b.json");
 
 admin.initializeApp({
@@ -16,6 +16,7 @@ router.get("/", (req, res) => {
   res.send("hello")
 });
 router.get("/reset-password", (req, res) => {
+  const email = req.query.email
 
   const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -26,7 +27,7 @@ router.get("/reset-password", (req, res) => {
   });
 
   // return false
-  const userEmail = 'sungkuk5420@gmail.com';
+  const userEmail = email;
   getAuth()
     .getUserByEmail(userEmail)
     .then((userRecord) => {
@@ -34,7 +35,10 @@ router.get("/reset-password", (req, res) => {
       console.log(`Successfully fetched user data: ${userRecord.toJSON()}`);
       console.log(userRecord.toJSON().uid);
       const uid = userRecord.toJSON().uid;
-      const newPassword = 'sdjkf23Fsdjx';
+      var newPassword = generator.generate({
+        length: 6,
+        numbers: true
+      });
       getAuth()
         .updateUser(uid, {
           email: userRecord.toJSON().email,
@@ -46,7 +50,7 @@ router.get("/reset-password", (req, res) => {
 
           const mailOptions = {
             from: 'mygangnaminsider@gmail.com',
-            to: 'sungkuk5420@gmail.com',
+            to: userEmail,
             subject: 'hello',
             text: 'your new password: ' + newPassword
           };
@@ -57,6 +61,9 @@ router.get("/reset-password", (req, res) => {
               console.log(error);
             } else {
               console.log('your new password: ' + newPassword);
+              res.json({
+                success: "sent new password"
+              })
               // do something useful
             }
           });
@@ -68,6 +75,9 @@ router.get("/reset-password", (req, res) => {
     })
     .catch((error) => {
       console.log('Error fetching user data:', error);
+      res.json({
+        ...error
+      })
     });
 });
 
