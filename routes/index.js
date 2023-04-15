@@ -80,6 +80,45 @@ router.get("/reset-password", (req, res) => {
       })
     });
 });
+router.post("/contact-us", (req, res) => {
+  console.log(req.body)
+  // return false;
+  const email = req.body.contactEmail;
+  const subject = req.body.contactSubject;
+  const content = req.body.contactContent;
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'mygangnaminsider@gmail.com',
+      pass: 'tnugoxrhimyrkcji'
+    }
+  });
+
+  // return false
+  const userEmail = email;
+
+  const mailOptions = {
+    from: 'mygangnaminsider@gmail.com',
+    to: 'mygangnaminsider@gmail.com',
+    subject: subject,
+    text: `contact us \n \n userEmail : \n ${userEmail} \n content: \n ${content}`
+  };
+
+
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log('sent contact us   ' + userEmail + " / content : " + content);
+      res.json({
+        success: "sent contact us "
+      })
+      // do something useful
+    }
+  });
+
+});
 
 
 
